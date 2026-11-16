@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mi Nube Privada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1020; --bg2:#121a33; --card:#16203f; --line:#24305a; --tx:#eef2ff; --mut:#93a0c8;
+  --acc:#5b8cff; --acc2:#7c5cff; --ok:#2fd09b; --bad:#ff5d73; --warn:#ffb648;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;font-size:15px}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 80% -10%,#24306a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#3b237055,transparent 60%),var(--bg)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.hidden{display:none!important}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.panel{width:100%;max-width:400px;background:linear-gradient(180deg,#18224499,#121a3399);border:1px solid var(--line);border-radius:26px;padding:28px 24px;backdrop-filter:blur(10px);box-shadow:0 30px 80px #0008}
+.logo{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin:0 auto 16px;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 10px 30px #5b8cff55}
+.logo svg{width:34px;height:34px}
+h1{font-size:24px;margin:0 0 6px;text-align:center;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--mut);text-align:center;margin:0 0 22px;line-height:1.45;font-size:14px}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:12px;color:var(--mut);margin:0 0 6px 4px;font-weight:600}
+.inp{width:100%;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#0c1328;outline:none;font-size:16px}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px #5b8cff33}
+.btn{width:100%;padding:14px;border-radius:14px;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-size:15px;box-shadow:0 8px 24px #5b8cff44}
+.btn:disabled{opacity:.55}
+.btn.ghost{background:#ffffff0d;box-shadow:none;border:1px solid var(--line)}
+.btn.danger{background:var(--bad);box-shadow:none}
+.link{color:var(--mut);font-size:13px;text-decoration:underline;display:block;margin:16px auto 0}
+.msg{min-height:20px;font-size:13px;text-align:center;margin:10px 0 0}
+.msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+.note{font-size:12.5px;color:var(--mut);background:#ffb64814;border:1px solid #ffb64840;padding:10px 12px;border-radius:12px;line-height:1.45;margin:14px 0 0}
+.spin{width:34px;height:34px;border:3px solid #ffffff22;border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* app */
+#s-app{display:block;padding:0}
+header{position:sticky;top:0;z-index:5;background:#0b1020e6;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;max-width:1100px;margin:0 auto}
+.top .logo{width:38px;height:38px;border-radius:12px;margin:0}
+.top .logo svg{width:20px;height:20px}
+.top h2{font-size:17px;margin:0;font-weight:800;flex:1}
+.ibtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#ffffff0d;border:1px solid var(--line)}
+.ibtn svg{width:19px;height:19px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;max-width:1100px;margin:0 auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:8px 14px;border-radius:999px;background:#ffffff0a;border:1px solid var(--line);color:var(--mut);font-weight:600;font-size:13.5px}
+.tab.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.tab b{font-weight:700;opacity:.7;margin-left:4px}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 120px}
+.search{margin-bottom:12px}
+.meter{font-size:12px;color:var(--mut);margin:0 0 14px;display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:6px;border-radius:9px;background:#ffffff14;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0}
+.banner{font-size:13px;color:#ffd79a;background:#ffb64814;border:1px solid #ffb64840;padding:10px 12px;border-radius:12px;margin-bottom:14px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+@media (max-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
+.it{position:relative;border-radius:16px;overflow:hidden;background:var(--card);border:1px solid var(--line);aspect-ratio:1/1;text-align:left;padding:0;display:flex;flex-direction:column}
+.it .th{flex:1;display:grid;place-items:center;background:#0f1730;overflow:hidden;position:relative}
+.it .th img{width:100%;height:100%;object-fit:cover;display:block}
+.it .th svg{width:38px;height:38px;opacity:.85}
+.it .play{position:absolute;inset:0;display:grid;place-items:center}
+.it .play span{width:38px;height:38px;border-radius:50%;background:#000a;display:grid;place-items:center}
+.it .play svg{width:16px;height:16px;opacity:1}
+.it .cap{padding:8px 10px;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .cap small{display:block;color:var(--mut);font-weight:500;font-size:11px}
+.it.notec .th{place-items:start;padding:12px;font-size:12.5px;color:#cfd6f5;line-height:1.4;text-align:left;background:linear-gradient(180deg,#1c2850,#141d3c)}
+.it.notec .th div{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.empty{text-align:center;color:var(--mut);padding:60px 10px}
+.empty svg{width:56px;height:56px;opacity:.5;margin-bottom:10px}
+.fab{position:fixed;right:20px;bottom:24px;width:62px;height:62px;border-radius:20px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;box-shadow:0 14px 34px #5b8cff66;z-index:6}
+.fab svg{width:28px;height:28px}
+.menu{position:fixed;right:20px;bottom:96px;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:6px;z-index:7;min-width:220px;box-shadow:0 20px 50px #000a}
+.menu button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:12px;font-weight:600;text-align:left}
+.menu button:active,.menu button:hover{background:#ffffff0d}
+.menu svg{width:20px;height:20px}
+.ups{position:fixed;left:16px;right:16px;bottom:100px;max-width:420px;margin:0 auto;z-index:6;display:flex;flex-direction:column;gap:6px}
+.up{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;box-shadow:0 10px 30px #0008}
+.up .row{display:flex;justify-content:space-between;gap:8px}
+.up .row span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up .bar{margin-top:6px}
+.up.err{border-color:#ff5d7366;color:#ffb3bd}
+
+/* modal */
+.ov{position:fixed;inset:0;background:#05081499;backdrop-filter:blur(6px);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:700px){.ov{align-items:center}}
+.sheet{width:100%;max-width:720px;max-height:94vh;background:var(--bg2);border:1px solid var(--line);border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:700px){.sheet{border-radius:24px}}
+.sh-h{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}
+.sh-h h3{flex:1;margin:0;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-b{flex:1;overflow:auto;padding:0 14px 14px}
+.sh-f{display:flex;gap:8px;padding:12px 14px 16px;border-top:1px solid var(--line)}
+.sh-f .btn{padding:12px}
+.media{background:#05081a;border-radius:16px;display:grid;place-items:center;min-height:220px;overflow:hidden}
+.media img,.media video{max-width:100%;max-height:68vh;display:block}
+.meta{color:var(--mut);font-size:12.5px;margin-top:10px}
+textarea.inp{min-height:46vh;resize:vertical;line-height:1.5}
+.small{max-width:420px}
+.small .sh-b{padding-top:4px}
+.small p{color:var(--mut);line-height:1.5;margin:0 0 14px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#fff;color:#0b1020;padding:10px 16px;border-radius:12px;font-weight:600;font-size:13.5px;z-index:40;box-shadow:0 10px 30px #0008;max-width:90vw;text-align:center}
+</style>
+<style>
+.seg{display:flex;background:#0c1328;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
+.seg button{flex:1;padding:10px;border-radius:10px;font-weight:700;color:var(--mut)}
+.seg button.on{background:#ffffff14;color:var(--tx)}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<section id="s-loading" class="screen">
+  <div style="text-align:center"><div class="spin"></div><p class="sub" style="margin-top:16px" id="loadTxt">Conectando con tu nube…</p></div>
+</section>
+
+<!-- Error -->
+<section id="s-error" class="screen hidden">
+  <div class="panel">
+    <div class="logo" style="background:#ff5d7333;box-shadow:none"><svg viewBox="0 0 24 24" fill="none" stroke="#ff5d73" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg></div>
+    <h1>No se pudo abrir</h1>
+    <p class="sub" id="errTxt"></p>
+  </div>
+</section>
+
+<!-- Login / Create -->
+<section id="s-login" class="screen hidden">
+  <form class="panel" id="fLogin">
+    <div class="logo">__LOCK__</div>
+    <h1>Mi Nube Privada</h1>
+    <p class="sub" id="loginSub">Entra con tu usuario y contraseña.</p>
+    <div class="seg"><button type="button" id="tEnter" class="on">Entrar</button><button type="button" id="tCreate">Crear mi nube</button></div>
+    <label class="field"><span>Usuario</span><input class="inp" id="lu" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label class="field"><span>Contraseña</span><input class="inp" type="password" id="lp" autocomplete="current-password" required></label>
+    <label class="field hidden" id="lp2w"><span>Repite la contraseña</span><input class="inp" type="password" id="lp2" autocomplete="new-password"></label>
+    <button class="btn" id="bLogin">Entrar</button>
+    <div class="msg" id="mLogin"></div>
+    <div class="note hidden" id="createNote"><b>Importante:</b> tus archivos se cifran con tu contraseña. Si la olvidas, nadie puede recuperarlos, ni siquiera el dueño de esta página. Guárdala en un lugar seguro.</div>
+  </form>
+</section>
+
+<!-- App -->
+<section id="s-app" class="hidden">
+  <header>
+    <div class="top">
+      <div class="logo">__LOCK__</div>
+      <h2 id="appTitle">Mi Nube</h2>
+      <button class="ibtn" id="bSettings" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <button class="ibtn" id="bLock" title="Bloquear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></button>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </header>
+  <main>
+    <input class="inp search" id="q" placeholder="Buscar por nombre…" autocomplete="off">
+    <div class="meter" id="meter"><span id="meterTxt"></span><div class="bar"><i id="meterBar"></i></div></div>
+    <div class="grid" id="grid"></div>
+    <div class="empty hidden" id="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 18a5 5 0 1 1 .8-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8H7z"/></svg><div id="emptyTxt">Tu nube está vacía. Toca <b>+</b> para guardar algo.</div></div>
+  </main>
+  <button class="fab" id="fab" aria-label="Agregar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <div class="menu hidden" id="menu">
+    <button id="mMedia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></svg>Fotos y videos</button>
+    <button id="mFile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Archivo</button>
+    <button id="mNote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/></svg>Nueva nota</button>
+  </div>
+  <div class="ups" id="ups"></div>
+  <input type="file" id="inMedia" accept="image/*,video/*" multiple class="hidden">
+  <input type="file" id="inFile" multiple class="hidden">
+</section>
+
+<div id="modal"></div>
+
+<script type="module">
+/* =====================================================================
+   PEGA AQUÍ LA CONFIGURACIÓN DE TU PROYECTO DE FIREBASE
+   (Firebase console → ⚙️ Configuración del proyecto → Tus apps → Config)
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCnrm18BYKviH3ty1qdhbVVZsLiIflnoE0",
+  authDomain: "mi-nube-313c1.firebaseapp.com",
+  projectId: "mi-nube-313c1",
+  storageBucket: "mi-nube-313c1.firebasestorage.app",
+  messagingSenderId: "56175542008",
+  appId: "1:56175542008:web:84aeef0817ff1ad811450d"
+};
+/* ===================================================================== */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query as fq, orderBy, onSnapshot, getDocs, Bytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.3" fill="#fff"/></svg>';
+document.querySelectorAll('.logo').forEach(e => { if (e.innerHTML.includes('__LOCK__')) e.innerHTML = LOCK_SVG; });
+
+const $ = id => document.getElementById(id);
+const te = new TextEncoder(), td = new TextDecoder();
+const rnd = n => crypto.getRandomValues(new Uint8Array(n));
+const ITER = 310000;
+const CHUNK = 900 * 1024;              // pedazo por documento (límite de Firestore: 1 MB)
+const MAX_FILE = 60 * 1024 * 1024;     // 60 MB por archivo
+const FREE_BYTES = 1024 * 1024 * 1024; // plan gratis de Firestore: 1 GB en total
+const AUTOLOCK_MS = 5 * 60 * 1000;
+
+let fdb = null, SID = null, KEY = null, USERNAME = '';
+let unsub = null, items = new Map(), metaCache = new Map(), blobCache = new Map(), thumbCache = new Map();
+let tab = 'todo', search = '', mode = 'enter', lockTimer = null, busy = 0, fails = 0, waitUntil = 0;
+
+/* ---------- utils ---------- */
+const hex = u => [...u].map(b => b.toString(16).padStart(2,'0')).join('');
+function fmtSize(n){ if(!n&&n!==0) return ''; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(0)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; }
+function fmtDate(t){ try{ return new Date(t).toLocaleDateString('es-DO',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ''; } }
+function show(id){ ['s-loading','s-error','s-login','s-app'].forEach(s => $(s).classList.toggle('hidden', s!==id)); }
+function fatal(t){ $('errTxt').textContent=t; show('s-error'); }
+function toast(t,ms=2600){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),ms); }
+function el(tag, cls, txt){ const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const newId = () => Date.now().toString(36) + hex(rnd(5));
+
+/* ---------- crypto ---------- */
+async function deriveAll(user, pass){
+  const base = await crypto.subtle.importKey('raw', te.encode(pass), 'PBKDF2', false, ['deriveBits']);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2', salt:te.encode('mi-nube-v1:'+user), iterations:ITER, hash:'SHA-256'}, base, 512));
+  const sid = hex(bits.subarray(0,32));
+  const key = await crypto.subtle.importKey('raw', bits.slice(32), {name:'AES-GCM'}, false, ['encrypt','decrypt']);
+  bits.fill(0);
+  return {sid, key};
+}
+async function enc(bytes){ const iv=rnd(12); const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, KEY, bytes)); const out=new Uint8Array(12+ct.length); out.set(iv); out.set(ct,12); return out; }
+async function dec(data){ return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM', iv:data.subarray(0,12)}, KEY, data.subarray(12))); }
+const B = u8 => Bytes.fromUint8Array(u8);
+const U = b => b.toUint8Array();
+async function encJSON(o){ return B(await enc(te.encode(JSON.stringify(o)))); }
+async function decJSON(b){ return JSON.parse(td.decode(await dec(U(b)))); }
+
+/* ---------- refs ---------- */
+const vaultRef = () => doc(fdb, 'nubes', SID);
+const itemsCol = () => collection(fdb, 'nubes', SID, 'items');
+const itemRef = id => doc(fdb, 'nubes', SID, 'items', id);
+const chunkRef = (id,k) => doc(fdb, 'nubes', SID, 'chunks', id+'_'+k);
+
+/* ---------- boot ---------- */
+if (String(firebaseConfig.apiKey).includes('PEGA')) {
+  fatal('Falta pegar la configuración de Firebase dentro del archivo (busca "PEGA AQUÍ").');
+} else {
+  try{
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    fdb = getFirestore(app);
+    const t = setTimeout(()=>fatal('No hay conexión con la nube. Revisa tu internet y vuelve a abrir el link.'), 15000);
+    onAuthStateChanged(auth, u => { if(u){ clearTimeout(t); toLogin(); } });
+    signInAnonymously(auth).catch(e => { clearTimeout(t); fatal('Firebase no permitió entrar. Revisa que el inicio de sesión "Anónimo" esté activado en Authentication.'); });
+  }catch(e){ fatal('La configuración de Firebase no es válida. Revisa lo que pegaste en el archivo.'); }
+}
+
+function toLogin(){
+  if (KEY) return;
+  show('s-login');
+  try{ const u=localStorage.getItem('nube_user'); if(u){ $('lu').value=u; setTimeout(()=>$('lp').focus(),50); } }catch(e){}
+}
+
+/* ---------- login / create ---------- */
+function setMode(m){
+  mode=m;
+  $('tEnter').classList.toggle('on', m==='enter'); $('tCreate').classList.toggle('on', m==='create');
+  $('lp2w').classList.toggle('hidden', m==='enter'); $('createNote').classList.toggle('hidden', m==='enter');
+  $('bLogin').textContent = m==='enter' ? 'Entrar' : 'Crear mi nube';
+  $('loginSub').textContent = m==='enter' ? 'Entra con tu usuario y contraseña.' : 'Elige un usuario y una contraseña para tu nube.';
+  $('lp').autocomplete = m==='enter' ? 'current-password' : 'new-password';
+  $('mLogin').textContent='';
+}
+$('tEnter').onclick=()=>setMode('enter');
+$('tCreate').onclick=()=>setMode('create');
+
+$('fLogin').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const m=$('mLogin'); m.className='msg bad';
+  const user=$('lu').value.trim().toLowerCase(), pass=$('lp').value;
+  if(user.length<3) return m.textContent='El usuario debe tener al menos 3 caracteres.';
+  if(Date.now()<waitUntil) return m.textContent='Demasiados intentos. Espera '+Math.ceil((waitUntil-Date.now())/1000)+' s.';
+  if(mode==='create'){
+    if(pass.length<8) return m.textContent='La contraseña debe tener al menos 8 caracteres.';
+    if(pass!==$('lp2').value) return m.textContent='Las contraseñas no coinciden.';
+  }
+  $('bLogin').disabled=true; m.className='msg'; m.textContent = mode==='enter' ? 'Verificando…' : 'Creando tu nube cifrada…';
+  try{
+    const {sid,key}=await deriveAll(user, pass);
+    SID=sid; KEY=key;
+    const snap=await getDoc(vaultRef());
+    if(mode==='enter'){
+      if(!snap.exists()) throw {code:'nope'};
+      await dec(U(snap.data().check));
+    } else {
+      if(snap.exists()) throw {code:'exists'};
+      await setDoc(vaultRef(), {v:1, created:Date.now(), check:B(await enc(te.encode('ok')))});
+    }
+    USERNAME=user; fails=0;
+    try{ localStorage.setItem('nube_user', user); }catch(e){}
+    $('lp').value=$('lp2').value=''; m.textContent='';
+    enterApp();
+  }catch(e){
+    SID=null; KEY=null;
+    m.className='msg bad';
+    if(e&&e.code==='nope'){ fails++; if(fails>=5){ waitUntil=Date.now()+30000; fails=0; } m.textContent='Usuario o contraseña incorrectos.'; }
+    else if(e&&e.code==='exists') m.textContent='Ya existe una nube con ese usuario y contraseña. Usa "Entrar".';
+    else if(e&&e.code==='permission-denied') m.textContent='Firebase rechazó la conexión. Revisa las reglas de Firestore.';
+    else m.textContent='No se pudo conectar. Revisa tu internet e intenta de nuevo.';
+  }
+  $('bLogin').disabled=false;
+});
+
+/* ---------- app ---------- */
+function enterApp(){
+  show('s-app');
+  $('appTitle').textContent = 'Nube de ' + USERNAME;
+  bumpLock(); subscribe();
+}
+function lock(){
+  KEY=null; SID=null;
+  if(unsub){ try{unsub();}catch(e){} unsub=null; }
+  blobCache.forEach(u=>URL.revokeObjectURL(u)); blobCache.clear();
+  thumbCache.forEach(t=>URL.revokeObjectURL(t.url)); thumbCache.clear();
+  metaCache.clear(); items.clear();
+  $('grid').innerHTML=''; $('modal').innerHTML=''; $('menu').classList.add('hidden');
+  clearTimeout(lockTimer); setMode('enter'); toLogin();
+}
+function bumpLock(){ clearTimeout(lockTimer); if(KEY) lockTimer=setTimeout(()=>{ if(!busy) lock(); else bumpLock(); }, AUTOLOCK_MS); }
+['pointerdown','keydown','touchstart','scroll'].forEach(e=>document.addEventListener(e, ()=>{ if(KEY) bumpLock(); }, {passive:true}));
+$('bLock').addEventListener('click', lock);
+
+function subscribe(){
+  $('emptyTxt').textContent='Cargando…'; $('empty').classList.remove('hidden');
+  const myKey = KEY;
+  unsub = onSnapshot(fq(itemsCol(), orderBy('t','desc')), async snap => {
+    const next=new Map();
+    for(const d of snap.docs){
+      const data=d.data(); if(!data.m) continue;
+      let mc=metaCache.get(d.id);
+      const sig=data.t+':'+data.m.toBase64().length;
+      if(!mc || mc.sig!==sig){
+        try{ mc={sig, meta:await decJSON(data.m)}; metaCache.set(d.id, mc); }catch(e){ continue; }
+      }
+      next.set(d.id, {data, meta:mc.meta});
+    }
+    if(KEY!==myKey) return;
+    items=next; render();
+  }, err => { $('emptyTxt').textContent='Se perdió la conexión con la nube. Vuelve a abrir el link.'; $('empty').classList.remove('hidden'); });
+}
+
+const CATS=[['todo','Todo'],['foto','Fotos'],['video','Videos'],['nota','Notas'],['archivo','Archivos']];
+function render(){
+  const counts={todo:items.size,foto:0,video:0,nota:0,archivo:0}; let used=0;
+  items.forEach(it=>{ counts[it.meta.cat]=(counts[it.meta.cat]||0)+1; used+=(it.meta.size||0)+(it.meta.text?it.meta.text.length:0); });
+  $('meterTxt').textContent='Usado: '+fmtSize(used); $('meterBar').style.width=Math.min(100,used/FREE_BYTES*100).toFixed(1)+'%';
+  const tabs=$('tabs'); tabs.innerHTML='';
+  CATS.forEach(([k,l])=>{ const b=el('button','tab'+(tab===k?' on':'')); b.textContent=l; b.appendChild(el('b',null,String(counts[k]||0))); b.onclick=()=>{tab=k; render();}; tabs.appendChild(b); });
+  const list=[...items.entries()].filter(([id,it])=> (tab==='todo'||it.meta.cat===tab) && (!search || (it.meta.name||it.meta.title||'').toLowerCase().includes(search) || (it.meta.cat==='nota' && (it.meta.text||'').toLowerCase().includes(search))));
+  const g=$('grid'); g.innerHTML='';
+  $('empty').classList.toggle('hidden', list.length>0);
+  if(!list.length) $('emptyTxt').innerHTML = items.size ? 'No hay nada aquí todavía.' : 'Tu nube está vacía. Toca <b>+</b> para guardar algo.';
+  for(const [id,it] of list) g.appendChild(card(id,it));
+}
+function icon(cat, name){
+  const ext=(name||'').split('.').pop().toLowerCase();
+  const c = cat==='nota'?'#ffd36b': ext==='pdf'?'#ff6b81': ['doc','docx'].includes(ext)?'#5b8cff': ['xls','xlsx','csv'].includes(ext)?'#2fd09b':'#9aa7d6';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+}
+function card(id,it){
+  const m=it.meta, isNote=m.cat==='nota';
+  const b=el('button','it'+(isNote?' notec':''));
+  const th=el('div','th');
+  if(isNote){ th.appendChild(el('div',null,(m.text||'').slice(0,400)||'(nota vacía)')); }
+  else if(it.data.th){
+    const img=el('img'); img.alt=''; th.appendChild(img);
+    loadThumb(id,it.data.th).then(u=>{ if(u) img.src=u; else th.innerHTML=icon(m.cat,m.name); });
+    if(m.cat==='video'){ const p=el('div','play'); p.innerHTML='<span><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>'; th.appendChild(p); }
+  } else {
+    th.innerHTML = m.cat==='video' ? '<svg viewBox="0 0 24 24" fill="none" stroke="#b18bff" stroke-width="1.6"><rect x="3" y="5" width="14" height="14" rx="3"/><path d="m17 10 4-2v8l-4-2"/></svg>' : icon(m.cat,m.name);
+  }
+  b.appendChild(th);
+  const cap=el('div','cap', isNote?(m.title||'Nota'):(m.name||'Sin nombre'));
+  cap.appendChild(el('small',null,(isNote?'':fmtSize(m.size)+' · ')+fmtDate(it.data.t)));
+  b.appendChild(cap); b.onclick=()=>openItem(id);
+  return b;
+}
+async function loadThumb(id, th){
+  const c=thumbCache.get(id); if(c) return c.url;
+  try{ const url=URL.createObjectURL(new Blob([await dec(U(th))],{type:'image/jpeg'})); thumbCache.set(id,{url}); return url; }catch(e){ return null; }
+}
+$('q').addEventListener('input', e=>{ search=e.target.value.trim().toLowerCase(); render(); });
+
+/* ---------- menu & uploads ---------- */
+$('fab').addEventListener('click', e=>{ e.stopPropagation(); $('menu').classList.toggle('hidden'); });
+document.addEventListener('click', e=>{ if(!$('menu').contains(e.target)) $('menu').classList.add('hidden'); });
+$('mMedia').onclick=()=>{ $('menu').classList.add('hidden'); $('inMedia').click(); };
+$('mFile').onclick=()=>{ $('menu').classList.add('hidden'); $('inFile').click(); };
+$('mNote').onclick=()=>{ $('menu').classList.add('hidden'); openNote(null); };
+$('inMedia').onchange=e=>{ queue([...e.target.files]); e.target.value=''; };
+$('inFile').onchange=e=>{ queue([...e.target.files]); e.target.value=''; };
+
+const jobs=[]; let running=false;
+function queue(files){ for(const f of files) jobs.push({f, ui:upUI(f)}); if(!running) runQueue(); }
+async function runQueue(){ running=true; while(jobs.length){ const j=jobs.shift(); busy++; try{ await uploadOne(j.f, j.ui); }finally{ busy--; } } running=false; }
+function upUI(f){
+  const d=el('div','up'); const r=el('div','row'); r.appendChild(el('span',null,f.name)); const p=el('span',null,'En espera'); r.appendChild(p); d.appendChild(r);
+  const bar=el('div','bar'); const i=el('i'); bar.appendChild(i); d.appendChild(bar); $('ups').appendChild(d);
+  return { set:(t,pc)=>{ p.textContent=t; if(pc!=null) i.style.width=pc+'%'; }, err:t=>{ d.classList.add('err'); p.textContent=''; r.firstChild.textContent=f.name+' — '+t; setTimeout(()=>d.remove(),7000); }, done:()=>{ i.style.width='100%'; p.textContent='Listo'; setTimeout(()=>d.remove(),1500); } };
+}
+function catOf(f){ const t=f.type||''; if(t.startsWith('image/')) return 'foto'; if(t.startsWith('video/')) return 'video'; return 'archivo'; }
+
+async function uploadOne(f, ui){
+  if(!KEY) return ui.err('nube bloqueada');
+  if(f.size===0) return ui.err('archivo vacío');
+  if(f.size>MAX_FILE) return ui.err('supera 60 MB');
+  const cat=catOf(f), id=newId(); let done=0;
+  try{
+    ui.set('Preparando…',2);
+    let th=null;
+    if(cat==='foto') th=await imageThumb(f); else if(cat==='video') th=await videoThumb(f);
+    const n=Math.ceil(f.size/CHUNK);
+    for(let k=0;k<n;k++){
+      ui.set('Cifrando y subiendo… '+Math.round(k/n*100)+'%', Math.round(k/n*95)+3);
+      const buf=new Uint8Array(await f.slice(k*CHUNK, Math.min(f.size,(k+1)*CHUNK)).arrayBuffer());
+      const data=B(await enc(buf));
+      try{ await setDoc(chunkRef(id,k), {d:data}); }
+      catch(e){ if(e&&e.code==='unavailable'){ await sleep(2000); await setDoc(chunkRef(id,k), {d:data}); } else throw e; }
+      done=k+1;
+    }
+    const meta={cat, name:f.name, mime:f.type||'application/octet-stream', size:f.size};
+    const body={t:Date.now(), m:await encJSON(meta), n};
+    if(th) body.th=B(await enc(th));
+    await setDoc(itemRef(id), body);
+    ui.done();
+  }catch(e){
+    for(let k=0;k<done;k++){ try{ await deleteDoc(chunkRef(id,k)); }catch(_){} }
+    const c=e&&e.code;
+    ui.err(c==='resource-exhausted'?'se llenó el límite gratis de hoy':c==='permission-denied'?'Firebase no lo permitió':'no se pudo subir');
+  }
+}
+function drawThumb(src,w,h){
+  return new Promise(res=>{
+    try{
+      const s=Math.min(1, 360/Math.max(w,h)); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+      c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+      c.toBlob(async b=>{ if(!b) return res(null); res(new Uint8Array(await b.arrayBuffer())); },'image/jpeg',0.72);
+    }catch(e){ res(null); }
+  });
+}
+function imageThumb(f){
+  return new Promise(res=>{
+    const u=URL.createObjectURL(f); const img=new Image(); let ok=false;
+    const fin=v=>{ if(ok) return; ok=true; URL.revokeObjectURL(u); res(v); };
+    img.onload=()=>drawThumb(img,img.naturalWidth,img.naturalHeight).then(fin);
+    img.onerror=()=>fin(null); setTimeout(()=>fin(null),8000); img.src=u;
+  });
+}
+function videoThumb(f){
+  return new Promise(res=>{
+    const v=document.createElement('video'); v.muted=true; v.playsInline=true; v.preload='auto';
+    const u=URL.createObjectURL(f); let ok=false;
+    const fin=r=>{ if(ok) return; ok=true; URL.revokeObjectURL(u); res(r); };
+    setTimeout(()=>fin(null),7000);
+    v.onloadeddata=()=>{ try{ v.currentTime=Math.min(1,(v.duration||2)/3); }catch(e){ fin(null); } };
+    v.onseeked=()=>drawThumb(v,v.videoWidth,v.videoHeight).then(fin);
+    v.onerror=()=>fin(null); v.src=u;
+  });
+}
+
+/* ---------- open / view ---------- */
+function modal(cls){
+  const ov=el('div','ov'); const sh=el('div','sheet '+(cls||'')); ov.appendChild(sh);
+  ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
+  function close(){ ov.remove(); }
+  $('modal').appendChild(ov);
+  return {sh, close};
+}
+function head(title, onClose){
+  const h=el('div','sh-h'); h.appendChild(el('h3',null,title));
+  const x=el('button','ibtn'); x.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>'; x.onclick=onClose; h.appendChild(x);
+  return h;
+}
+async function getBlob(id, it, onProg){
+  if(blobCache.has(id)) return blobCache.get(id);
+  const parts=[], n=it.data.n||0;
+  for(let k=0;k<n;k++){
+    if(onProg) onProg(Math.round(k/n*100));
+    const s=await getDoc(chunkRef(id,k)); if(!s.exists()) throw {code:'missing'};
+    parts.push(await dec(U(s.data().d)));
+  }
+  const url=URL.createObjectURL(new Blob(parts,{type:it.meta.mime||'application/octet-stream'}));
+  blobCache.set(id,url); return url;
+}
+async function openItem(id){
+  const it=items.get(id); if(!it) return;
+  if(it.meta.cat==='nota') return openNote(id);
+  const m=it.meta; const md=modal();
+  md.sh.appendChild(head(m.name||'Archivo', md.close));
+  const body=el('div','sh-b'); const box=el('div','media');
+  const ld=el('div',null); ld.style.textAlign='center'; ld.innerHTML='<div class="spin"></div>'; const pct=el('div','meta','Descifrando…'); ld.appendChild(pct); box.appendChild(ld);
+  body.appendChild(box);
+  body.appendChild(el('div','meta', fmtSize(m.size)+' · guardado el '+fmtDate(it.data.t)));
+  md.sh.appendChild(body);
+  const f=el('div','sh-f'); const bDl=el('button','btn','Descargar'); const bDel=el('button','btn ghost','Eliminar'); bDel.style.color='#ff8b9b';
+  f.appendChild(bDl); f.appendChild(bDel); md.sh.appendChild(f);
+  bDel.onclick=()=>confirmDelete(id, md.close);
+  bDl.onclick=()=>doDownload(id,it);
+  try{
+    busy++;
+    const url=await getBlob(id,it,p=>pct.textContent='Descifrando… '+p+'%');
+    box.innerHTML='';
+    if(m.cat==='foto'){ const i=el('img'); i.src=url; i.alt=m.name; box.appendChild(i); }
+    else if(m.cat==='video'){ const v=el('video'); v.src=url; v.controls=true; v.playsInline=true; box.appendChild(v); }
+    else { box.style.minHeight='160px'; box.innerHTML='<div style="text-align:center;padding:24px">'+icon(m.cat,m.name).replace('<svg','<svg style="width:64px;height:64px"')+'<div class="meta">Toca “Descargar” para abrirlo en tu dispositivo.</div></div>'; }
+  }catch(e){ box.innerHTML=''; box.appendChild(el('div','meta','No se pudo abrir este archivo. Revisa tu conexión.')); }
+  finally{ busy--; }
+}
+async function doDownload(id,it){
+  try{
+    busy++;
+    const url=await getBlob(id,it);
+    const a=document.createElement('a'); a.href=url; a.download=it.meta.name||'archivo'; document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){ toast('No se pudo descargar.'); }
+  finally{ busy--; }
+}
+function confirmDelete(id, after){
+  const it=items.get(id); if(!it) return;
+  const md=modal('small'); md.sh.appendChild(head('¿Eliminar?', md.close));
+  const b=el('div','sh-b'); b.appendChild(el('p',null,'“'+(it.meta.name||it.meta.title||'Nota')+'” se borrará para siempre.')); md.sh.appendChild(b);
+  const f=el('div','sh-f'); const c=el('button','btn ghost','Cancelar'); const d=el('button','btn danger','Eliminar'); f.appendChild(c); f.appendChild(d); md.sh.appendChild(f);
+  c.onclick=md.close;
+  d.onclick=async()=>{
+    d.disabled=true; d.textContent='Eliminando…';
+    try{
+      await deleteDoc(itemRef(id));
+      for(let k=0;k<(it.data.n||0);k++){ try{ await deleteDoc(chunkRef(id,k)); }catch(e){} }
+      if(blobCache.has(id)){ URL.revokeObjectURL(blobCache.get(id)); blobCache.delete(id); }
+      md.close(); if(after) after(); toast('Eliminado');
+    }catch(e){ d.disabled=false; d.textContent='Eliminar'; toast('No se pudo eliminar.'); }
+  };
+}
+
+/* ---------- notes ---------- */
+function openNote(id){
+  const it=id?items.get(id):null; const m=it?it.meta:{title:'',text:''};
+  const md=modal(); md.sh.appendChild(head(id?'Nota':'Nueva nota', md.close));
+  const b=el('div','sh-b');
+  const t=el('input','inp'); t.placeholder='Título'; t.value=m.title||''; t.style.marginBottom='10px'; t.style.fontWeight='700';
+  const ta=el('textarea','inp'); ta.placeholder='Escribe tu nota…'; ta.value=m.text||'';
+  b.appendChild(t); b.appendChild(ta); md.sh.appendChild(b);
+  const f=el('div','sh-f'); const s=el('button','btn','Guardar'); f.appendChild(s);
+  if(id){ const d=el('button','btn ghost','Eliminar'); d.style.color='#ff8b9b'; d.style.maxWidth='130px'; d.onclick=()=>confirmDelete(id, md.close); f.appendChild(d); }
+  md.sh.appendChild(f);
+  if(!id) setTimeout(()=>t.focus(),60);
+  s.onclick=async()=>{
+    const meta={cat:'nota', title:t.value.trim()||'Nota sin título', text:ta.value};
+    if(ta.value.length>700000) return toast('La nota es demasiado larga.');
+    s.disabled=true; s.textContent='Guardando…';
+    try{
+      const m2=await encJSON(meta);
+      if(id) await updateDoc(itemRef(id), {m:m2, t:Date.now()});
+      else await setDoc(itemRef(newId()), {t:Date.now(), m:m2, n:0});
+      md.close(); toast('Nota guardada');
+    }catch(e){ s.disabled=false; s.textContent='Guardar'; toast('No se pudo guardar.'); }
+  };
+}
+
+/* ---------- settings ---------- */
+$('bSettings').onclick=()=>{
+  const md=modal('small'); md.sh.appendChild(head('Ajustes', md.close));
+  const b=el('div','sh-b');
+  const p1=el('p'); p1.innerHTML='Usuario: <b></b><br>La nube se bloquea sola tras 5 minutos sin uso.<br><br>Espacio gratis total: 1 GB (compartido entre todas las nubes de este link). Máximo 60 MB por archivo.'; p1.querySelector('b').textContent=USERNAME; b.appendChild(p1);
+  b.appendChild(el('p',null,'Borrar mi nube elimina para siempre todas tus fotos, videos, notas y archivos.'));
+  const inp=el('input','inp'); inp.placeholder='Escribe BORRAR para confirmar'; inp.autocapitalize='characters';
+  const msg=el('div','msg'); b.appendChild(inp); b.appendChild(msg);
+  md.sh.appendChild(b);
+  const f=el('div','sh-f'); const d=el('button','btn danger','Borrar mi nube'); f.appendChild(d); md.sh.appendChild(f);
+  d.onclick=async()=>{
+    if(inp.value.trim().toUpperCase()!=='BORRAR'){ msg.className='msg bad'; msg.textContent='Escribe BORRAR para confirmar.'; return; }
+    d.disabled=true; msg.className='msg'; msg.textContent='Borrando…'; busy++;
+    try{
+      const all=[...items.entries()];
+      for(const [id,it] of all){ await deleteDoc(itemRef(id)); for(let k=0;k<(it.data.n||0);k++){ try{ await deleteDoc(chunkRef(id,k)); }catch(e){} } }
+      await deleteDoc(vaultRef());
+      busy--; md.close(); lock(); toast('Tu nube fue borrada');
+    }catch(e){ busy--; d.disabled=false; msg.className='msg bad'; msg.textContent='No se pudo borrar todo. Intenta de nuevo.'; }
+  };
+};
+</script>
+</body>
+</html>
